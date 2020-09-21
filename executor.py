@@ -1,66 +1,10 @@
-# import random
-
-# class Executor:
-
-#   def reg_check(self, policy):
-#     a = random.random()
-#     policy_type = policy["body"][0]["value"]
-#     if a > 0.5:
-#       return {"status": 0, "msg": policy_type}
-#     else:
-#       return {"status": 1, "msg": policy_type}
-
-
-#   def password_policy(self, policy):
-#     a = random.random()
-#     policy_type = policy["body"][0]["value"]
-#     if a > 0.5:
-#       return {"status": 0, "msg": policy_type}
-#     else:
-#       return {"status": 1, "msg": policy_type}
-
-
-#   def execute(self, policy):
-#     res = None
-#     policy_type = policy["type"]
-#     if policy_type == "PASSWORD_POLICY":
-#       res = self.password_policy(policy)
-#     elif policy_type == "REG_CHECK":
-#       res = self.reg_check(policy)
-#     # elif policy_type == "FILE_CHECK":
-#     #   print("policy")
-#     # elif policy_type == "REGISTRY_SETTING":
-#     #   print("policy")
-#     # elif policy_type == "WMI_POLICY":
-#     #   print("policy")
-#     # elif policy_type == "AUDIT_POWERSHELL":
-#     #   print("policy")
-#     # elif policy_type == "SERVICE_POLICY":
-#     #   print("policy")
-#     # elif policy_type == "AUDIT_POLICY":
-#     #   print("policy")
-#     # elif policy_type == "USER_RIGHTS_POLICY":
-#     #   print("policy")
-#     # elif policy_type == "LOCKOUT_POLICY":
-#     #   print("policy")
-#     else:
-#       res = {"status": 1, "msg": "To be done"}
-#     return res
-
-
-
 import winreg
 import random
 import win32net
 import win32service
 import win32security
 import os
-import ctypes
-import admin
 from subprocess import check_output
-
-if not admin.isUserAdmin():
-  admin.runAsAdmin()
 
 class Executor:
 
@@ -193,10 +137,6 @@ class Executor:
         return {"status": 0, "msg": "Passed"}
       return {"status": 1, "msg": f"No {item} at {path}"}
 
-  # def service_policy(self, policy):
-  #   print(win32service.QueryServiceObjectSecurity("MSFtpsvc"))
-  #   return {"status": 1, "msg": "File not found"}
-
   def file_check(self, policy):
     file2check = policy["value_data"]
     condition = policy["file_option"]
@@ -300,12 +240,5 @@ class Executor:
       res = self.audit_powershell(policy)
     else:
        res = {"status": -1, "msg": f"{policy_type} to be done"}
-
-    # elif policy_type == "WMI_POLICY":
-    #   print("policy")
-
-
-    # elif policy_type == "AUDIT_POLICY":
-    #   print("policy")
-
     return res
+    

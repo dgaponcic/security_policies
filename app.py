@@ -7,6 +7,10 @@ import re
 from policy_parser import parse
 from mongo_connection import db
 from executor import Executor
+import admin
+
+if not admin.isUserAdmin():
+  admin.runAsAdmin()
 
 
 class UiMainWindow(QWidget):
@@ -320,11 +324,12 @@ class UiMainWindow(QWidget):
         
 
 if __name__ == "__main__":
-  app = QtWidgets.QApplication([])
-  MainWindow = QtWidgets.QMainWindow()
-  ui = UiMainWindow()
-  ui.init(db)
-  ui.setupUi(MainWindow)
-  ui.getPolicies()
-  MainWindow.show()
-  sys.exit(app.exec_())
+  if admin.isUserAdmin():
+    app = QtWidgets.QApplication([])
+    MainWindow = QtWidgets.QMainWindow()
+    ui = UiMainWindow()
+    ui.init(db)
+    ui.setupUi(MainWindow)
+    ui.getPolicies()
+    MainWindow.show()
+    sys.exit(app.exec_())
