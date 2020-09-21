@@ -11,6 +11,7 @@ class MongoDB:
   
   def insert_policy(self, policy, name):
     policy = {'name': name, 'policy': policy}
+
     self.my_collection.insert_one(policy)
 
   def find_policy_by_name(self, name):

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QTab
 from PyQt5.QtGui import QIcon
 import pymongo
 import re
-from policy_parser import my_f
+from policy_parser import parse
 from mongo_connection import db
 from executor import Executor
 
@@ -139,9 +139,9 @@ class UiMainWindow(QWidget):
     self.clearTable()
     for policy in policies:
             self.tableWidget2.insertRow(self.table2Index)
-            self.tableWidget2.setItem(self.table2Index, 0, QtWidgets.QTableWidgetItem(policy))
+            self.tableWidget2.setItem(self.table2Index, 0, QtWidgets.QTableWidgetItem(policy["description"]))
             result = self.executor.execute(policy)
-            color = "green" if result["status"] == 0 else "red"
+            color = "green" if result["status"] == 0 else "blue" if result["status"] == -1 else "red"
             self.tableWidget2.setItem(self.table2Index, 1, QtWidgets.QTableWidgetItem(result["msg"]))
             self.tableWidget2.item(self.table2Index, 1).setBackground(QtGui.QColor(color))
             self.table2Index += 1
@@ -239,7 +239,7 @@ class UiMainWindow(QWidget):
       return text
 
   def parsePolicy(self, text):
-    return my_f(text)
+    return parse(text)
 
   def addRow2table(self, name):
     rowPosition = self.tableWidget.rowCount()
