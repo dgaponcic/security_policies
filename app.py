@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QTab
 from PyQt5.QtGui import QIcon
 import pymongo
 import re
+import random
 from policy_parser import parse
 from mongo_connection import db
 from executor import Executor
@@ -17,11 +18,13 @@ class UiMainWindow(QWidget):
   def init(self, db):
     self.checkedLines = []
     self.allLines = []
+    self.notPassed = []
     self.isCheckedAll = False
     self.db = db
     self.policy = None
     self.name = None
     self.table2Index = 0
+    self.enforced = []
     self.executor = Executor()
 
   def setupUi(self, MainWindow):
@@ -95,6 +98,20 @@ class UiMainWindow(QWidget):
     self.executeBtn.clicked.connect(self.execute)
     self.executeBtn.setEnabled(False)
 
+  def initEnforceButton(self, MainWindow):
+    self.enforceBtn = QtWidgets.QPushButton(MainWindow)
+    self.enforceBtn.setText("Enforce")
+    self.enforceBtn.move(850, 400)
+    self.enforceBtn.clicked.connect(self.enforce)
+    self.enforceBtn.setEnabled(False)
+
+  def initRollbackButton(self, MainWindow):
+    self.rollbackBtn = QtWidgets.QPushButton(MainWindow)
+    self.rollbackBtn.setText("Rollback")
+    self.rollbackBtn.move(850, 430)
+    self.rollbackBtn.clicked.connect(self.rollback)
+    self.rollbackBtn.setEnabled(False)
+
   def initMainWindow(self, MainWindow):
     self.centralwidget = QtWidgets.QWidget(MainWindow)
     self.centralwidget.setObjectName("centralwidget")
@@ -102,6 +119,8 @@ class UiMainWindow(QWidget):
     self.initSaveAsButton()
     self.initSaveButton(MainWindow)
     self.initExecuteButton(MainWindow)
+    self.initEnforceButton(MainWindow)
+    self.initRollbackButton(MainWindow)
     self.initPoliciesTable()
     self.initSearchBar(MainWindow)
     self.initPushButton(MainWindow)
@@ -137,7 +156,23 @@ class UiMainWindow(QWidget):
     self.menuFile.setTitle(_translate("MainWindow", "Import Policy"))
     self.actionOpenFile.setText(_translate("MainWindow", "Open File"))
 
+  def enforce(self):
+    self.enforceBtn.setEnabled(False)
+    self.rollbackBtn.setEnabled(True)
+    for policy in self.notPassed:
+      if policy not in self.enforced:
+        self.enforced.append(policy)
+    self.notPassed = []
+    print("mmm")
+
+  def rollback(self):
+    for policy in self.enforced:
+      print(policy)
+    self.rollbackBtn.setEnabled(False)
+    print("mmm")
+
   def execute(self):
+    self.enforceBtn.setEnabled(True)
     self.executeBtn.setEnabled(False)
     policies = db.find_policy_by_name(self.name)["policy"]
     self.clearTable()
@@ -145,10 +180,13 @@ class UiMainWindow(QWidget):
             self.tableWidget2.insertRow(self.table2Index)
             self.tableWidget2.setItem(self.table2Index, 0, QtWidgets.QTableWidgetItem(policy["description"]))
             result = self.executor.execute(policy)
+            # result = {"status": 0, "msg": "YESSSSSSSSSSSS"} if random.random() < 0.5 else {"status": 1, "msg": "NOOOOOOOOOOOOOO"}
             color = "green" if result["status"] == 0 else "blue" if result["status"] == -1 else "red"
             self.tableWidget2.setItem(self.table2Index, 1, QtWidgets.QTableWidgetItem(result["msg"]))
             self.tableWidget2.item(self.table2Index, 1).setBackground(QtGui.QColor(color))
             self.table2Index += 1
+            if result["status"] == 1:
+              self.notPassed.append(policy)
 
 
 

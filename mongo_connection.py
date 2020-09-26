@@ -2,8 +2,9 @@ import pymongo
 
 class MongoDB:
   def __init__(self):
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    db = myclient["security"]
+    # myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    connection = pymongo.MongoClient("mongodb://username:password1@ds345937.mlab.com:45937/policies?retryWrites=false")
+    db = connection.get_default_database()
     self.my_collection = db["policies"]
 
   def get_all_policies_name(self):
