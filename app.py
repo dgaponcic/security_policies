@@ -8,6 +8,8 @@ import random
 from policy_parser import parse
 from mongo_connection import db
 from executor import Executor
+from enforce import Enforcer
+from rollback import Rollbacker
 import admin
 
 if not admin.isUserAdmin():
@@ -26,6 +28,8 @@ class UiMainWindow(QWidget):
     self.table2Index = 0
     self.enforced = []
     self.executor = Executor()
+    self.enforcer = Enforcer()
+    self.rollbacker = Rollbacker()
 
   def setupUi(self, MainWindow):
     MainWindow.setObjectName("MainWindow")
@@ -159,17 +163,23 @@ class UiMainWindow(QWidget):
   def enforce(self):
     self.enforceBtn.setEnabled(False)
     self.rollbackBtn.setEnabled(True)
+    print(self.notPassed)
     for policy in self.notPassed:
       if policy not in self.enforced:
-        self.enforced.append(policy)
+        res = self.enforcer.enforce(policy)
+        if res["status"] == 0:
+          self.enforced.append({"policy": policy, "val": res["msg"]})
     self.notPassed = []
-    print("mmm")
+    self.execute()
+
+
 
   def rollback(self):
     for policy in self.enforced:
-      print(policy)
+      self.rollbacker.rollback(policy["policy"], policy["val"])
     self.rollbackBtn.setEnabled(False)
-    print("mmm")
+    self.enforced = []
+    self.execute()
 
   def execute(self):
     self.enforceBtn.setEnabled(True)
@@ -180,15 +190,12 @@ class UiMainWindow(QWidget):
             self.tableWidget2.insertRow(self.table2Index)
             self.tableWidget2.setItem(self.table2Index, 0, QtWidgets.QTableWidgetItem(policy["description"]))
             result = self.executor.execute(policy)
-            # result = {"status": 0, "msg": "YESSSSSSSSSSSS"} if random.random() < 0.5 else {"status": 1, "msg": "NOOOOOOOOOOOOOO"}
             color = "green" if result["status"] == 0 else "blue" if result["status"] == -1 else "red"
             self.tableWidget2.setItem(self.table2Index, 1, QtWidgets.QTableWidgetItem(result["msg"]))
             self.tableWidget2.item(self.table2Index, 1).setBackground(QtGui.QColor(color))
             self.table2Index += 1
             if result["status"] == 1:
               self.notPassed.append(policy)
-
-
 
   def save(self):
     self.checkedLines = []
