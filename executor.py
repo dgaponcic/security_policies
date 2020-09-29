@@ -189,22 +189,35 @@ class Executor:
 
 
   def user_rights_policy(self, policy):
-    actual_users = []
-    for val in win32security.LsaEnumerateAccountsWithUserRight(win32security.LsaOpenPolicy("", 7), "SeBatchLogonRight"):
-      actual_users.append(win32security.LookupAccountSid(None, val)[0])
-    file_users = policy["value_data"]
-    if file_users == '':
-      if len(actual_users) == 0:
+    try:
+        actual_users = []
+        print(policy["right_type"])
+        lsa_policy = win32security.LsaOpenPolicy("", 25)
+        print(lsa_policy)
+        users = win32security.LsaEnumerateAccountsWithUserRight(lsa_policy, policy["right_type"])
+        for val in users:
+            actual_users.append(win32security.LookupAccountSid(None, val)[0])
+        file_users = policy["value_data"]
+        if file_users == '':
+            if len(actual_users) == 0:
+                return {"status": 0, "msg": f"Passed"}
+            else:
+                return {"status": 1, "msg": f"There are users who are granted this permission"}
+        file_users = file_users.replace("'", "").replace('"', '').split('&&')
+        file_users = [user.strip() for user in file_users]
+        
+        for user in file_users:
+            if user not in actual_users:
+                return {"status": 1, "msg": f"User {user} not granted permission"}
+
+        for user in actual_users:
+            if user not in file_users:
+                return {"status": 1, "msg": f"User {user} should not be granted permission"}
         return {"status": 0, "msg": f"Passed"}
-      else:
-        return {"status": 1, "msg": f"There are users who are granted this permission"}
-    file_users = file_users.replace("'", "").replace('"', '').split('&&')
-    file_users = [user.strip() for user in file_users]
-    
-    for user in file_users:
-      if user not in actual_users:
-        return {"status": 1, "msg": f"User {user} not granted permission"}
-    return {"status": 0, "msg": f"Passed"}
+    except Exception as e:
+        print(e)
+        return {"status": -1, "msg": f"To be done Acces Denied User Rights"}
+
 
   def audit_powershell(self, policy):
     try:

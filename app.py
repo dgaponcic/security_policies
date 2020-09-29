@@ -307,8 +307,8 @@ class UiMainWindow(QWidget):
         chkBoxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
         chkBoxItem.setCheckState(QtCore.Qt.Unchecked) 
         self.tableWidget2.setItem(self.table2Index, 0, chkBoxItem)
-        self.tableWidget2.setItem(self.table2Index, 1, QtWidgets.QTableWidgetItem(val["description"]))
-        self.allLines.append(val["description"])
+        self.tableWidget2.setItem(self.table2Index, 1, QtWidgets.QTableWidgetItem(f'{val["description"]}  TYPE: {val["type"]}'))
+        self.allLines.append(f'{val["description"]}  TYPE: {val["type"]}')
 
   def clearTable(self):
     self.table2Index = 0
@@ -352,9 +352,12 @@ class UiMainWindow(QWidget):
 
   def getNewPolicyFile(self, policy):
     res = []
+    print(self.checkedLines)
     for description in self.checkedLines:
       for val in policy:
-        if val["description"] == description:
+        param_description = description.split("  TYPE:")[0]
+        if param_description == val["description"]:
+          print("here")
           res.append(val)
     return res
 
