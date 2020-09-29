@@ -163,7 +163,6 @@ class UiMainWindow(QWidget):
   def enforce(self):
     self.enforceBtn.setEnabled(False)
     self.rollbackBtn.setEnabled(True)
-    print(self.notPassed)
     for policy in self.notPassed:
       if policy not in self.enforced:
         res = self.enforcer.enforce(policy)
@@ -352,12 +351,10 @@ class UiMainWindow(QWidget):
 
   def getNewPolicyFile(self, policy):
     res = []
-    print(self.checkedLines)
     for description in self.checkedLines:
       for val in policy:
         param_description = description.split("  TYPE:")[0]
         if param_description == val["description"]:
-          print("here")
           res.append(val)
     return res
 

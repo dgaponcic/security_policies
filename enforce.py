@@ -1,5 +1,6 @@
 import winreg
 import os
+import win32security
 
 class Enforcer:
 
@@ -43,21 +44,34 @@ class Enforcer:
         actual_users = []
         granted = []
         deleted = []
-        for val in win32security.LsaEnumerateAccountsWithUserRight(win32security.LsaOpenPolicy("", 7), "SeBatchLogonRight"):
+        for val in win32security.LsaEnumerateAccountsWithUserRight(win32security.LsaOpenPolicy("", 25), policy["right_type"]):
             actual_users.append(win32security.LookupAccountSid(None, val)[0])
         file_users = policy["value_data"]
-        if file_users == '' and len(actual_users) != 0:
-            pass
-            return {"status": 1, "msg": actual_users}
+        if (file_users == '' or file_users == "Undefined") and len(actual_users) != 0:
+            for user in actual_users:
+                try:
+                    win32security.LsaRemoveAccountRights(win32security.LsaOpenPolicy("", 25), win32security.LookupAccountName(None, user)[0], 0, [policy["right_type"]])
+                    deleted.append(user)
+                except Exception as e:
+                    continue
+            return {"status": 0, "msg": {"granted": granted, "deleted": deleted}}
+        
         file_users = file_users.replace("'", "").replace('"', '').split('&&')
         file_users = [user.strip() for user in file_users]
-        
         for user in file_users:
-            if user not in actual_users:
-                pass
+            try:
+                if user not in actual_users:
+                    win32security.LsaAddAccountRights(win32security.LsaOpenPolicy("", 25), win32security.LookupAccountName(None, user)[0], [policy["right_type"]])
+                    granted.append(user)
+            except Exception as e:
+                continue
         for user in actual_users:
-            if user not in file_users:
-                pass
+            try:
+                if user not in file_users:
+                    win32security.LsaRemoveAccountRights(win32security.LsaOpenPolicy("", 25), win32security.LookupAccountName(None, user)[0], 0, [policy["right_type"]])
+                    deleted.append(user)
+            except Exception as e:
+                continue
         return {"status": 0, "msg": {"granted": granted, "deleted": deleted}}
 
     def enforce(self, policy):

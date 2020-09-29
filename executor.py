@@ -191,9 +191,7 @@ class Executor:
   def user_rights_policy(self, policy):
     try:
         actual_users = []
-        print(policy["right_type"])
         lsa_policy = win32security.LsaOpenPolicy("", 25)
-        print(lsa_policy)
         users = win32security.LsaEnumerateAccountsWithUserRight(lsa_policy, policy["right_type"])
         for val in users:
             actual_users.append(win32security.LookupAccountSid(None, val)[0])
@@ -205,7 +203,6 @@ class Executor:
                 return {"status": 1, "msg": f"There are users who are granted this permission"}
         file_users = file_users.replace("'", "").replace('"', '').split('&&')
         file_users = [user.strip() for user in file_users]
-        
         for user in file_users:
             if user not in actual_users:
                 return {"status": 1, "msg": f"User {user} not granted permission"}
@@ -229,7 +226,7 @@ class Executor:
         data = policy["value_data"]
         if data == res:
           return {"status": 0, "msg": "Passed"}
-      return {"status": 0, "msg": f"Expected output was {res}"}
+      return {"status": 1, "msg": f"Expected output was {res}"}
     except:
       return {"status": -1, "msg": f"Could not execute powershell with argument {policy['powershell_args']}"}
 

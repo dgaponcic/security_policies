@@ -1,4 +1,5 @@
 import winreg
+import win32security
 
 class Rollbacker:
 
@@ -39,9 +40,16 @@ class Rollbacker:
     granted = val["granted"]
     deleted = val["deleted"]
     for user in granted:
-        pass
+        try:
+            win32security.LsaRemoveAccountRights(win32security.LsaOpenPolicy("", 25), win32security.LookupAccountName(None, user)[0], 0, [policy["right_type"]])
+        except Exception as e:
+            continue
     for user in deleted:
-        pass
+        try: 
+            win32security.LsaAddAccountRights(win32security.LsaOpenPolicy("", 25), win32security.LookupAccountName(None, user)[0], [policy["right_type"]])
+        except Exception as e:
+            continue
+    return {"status": 0, "msg": "Success"}
 
   def rollback(self, policy, val):
     res = None
@@ -49,9 +57,9 @@ class Rollbacker:
     if policy_type == "REG_CHECK":
         res = self.reg_check(policy, val)
     elif policy_type == "FILE_CHECK":
-        res = self.file_check(policy)
+        res = self.file_check(policy, val)
     elif policy_type == "USER_RIGHTS_POLICY":
-      res = self.user_rights_policy(policy)
+      res = self.user_rights_policy(policy, val)
     else:
         res = {"status": -1, "msg": f"{policy_type} to be done"}
     return res
