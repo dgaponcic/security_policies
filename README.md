@@ -1,6 +1,6 @@
 # security_policies
 
-A tool for parsing and running audit security policies.
+A tool for parsing and running and enforcing audit security policies.
 
 The application is written in Python, for GUI used PyQT.
 
@@ -25,6 +25,17 @@ For now the following types of custom_item are executed:
 * USER_RIGHTS_POLICY
 * AUDIT_POWERSHELL
 
+### Enforce and Rollback
+Enforcing and Rollback is work in progress.
+
+For now the following types of custom_item are enforced and rollbacked:
+* REG_CHECK
+* FILE_CHECK
+* USER_RIGHTS_POLICY
+
+### Known Issues
+* Not all errors are caught (this can kill the application) work in progress
+* Some user rights policies don't work on the virtual box I use (access denied even as Administrator) work in progress
 
 ### Demo 
 Here you can see how to import a policy and review the policy before submitting. Once submitted you are asked to introduce a name for the policy. After submision the policy is parsed and stored in a mongo database. We can also perform search on policies and choose what rules we want to add, then save to a new document or update an existing one.
@@ -37,3 +48,5 @@ After execution, in the output we can see:
 * Blue policies - Work in progress. To be done.
 
 TODO add demo execution
+TODO add demo enforcing and rollback
+
