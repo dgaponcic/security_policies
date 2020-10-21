@@ -9,8 +9,7 @@ The files are written in a XML-like language.
 Parsed policy is stored under a name in Mongo database.
 
 ### To run the program:
-* make sure you have mongo db running on localhost, port 27017
-* make sure all files are in current directory
+* make sure all files are in the current directory
 * execute "python app.py" 
 
 ### Execute
@@ -47,6 +46,6 @@ After execution, in the output we can see:
 * Red policies - An error occured, you can find the error in the output.
 * Blue policies - Work in progress. To be done.
 
-TODO add demo execution
-TODO add demo enforcing and rollback
+<img src="https://github.com/dgaponcic/security_policies/blob/master/enforce.gif">
+
 
